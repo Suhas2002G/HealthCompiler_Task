@@ -12,6 +12,9 @@ router = APIRouter(prefix="/contacts", tags=["Contacts"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_contact(contact: ContactCreate, db: Session = Depends(get_db)):
+    """
+    Create a new contact with provided details.
+    """
     try:
         data = contact_service.create_contact(db, contact)
         return success_response(data, "Contact created successfully")
@@ -22,6 +25,9 @@ def create_contact(contact: ContactCreate, db: Session = Depends(get_db)):
 
 @router.get("/search")
 def search_contacts(q: str, db: Session = Depends(get_db)):
+    """
+    Search contacts by name, phone, or email.
+    """
     try:
         data = contact_service.search_contacts(db, q)
         return success_response(data, "Contacts fetched successfully")
@@ -31,6 +37,9 @@ def search_contacts(q: str, db: Session = Depends(get_db)):
 
 @router.delete("/{contact_id}")
 def delete_contact(contact_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a contact by its ID.
+    """
     try:
         contact_service.delete_contact(db, contact_id)
         return success_response(message="Contact deleted successfully")
@@ -38,13 +47,6 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db)):
         return error_response(str(e))
 
 
-# @router.put("/merge")
-# def merge_contacts(id1: int, id2: int, db: Session = Depends(get_db)):
-#     try:
-#         data = contact_service.merge_contacts(db, id1, id2)
-#         return success_response(data, "Contacts merged successfully")
-#     except Exception as e:
-#         return error_response(str(e))
     
 
 @router.put("/merge", status_code=200)
