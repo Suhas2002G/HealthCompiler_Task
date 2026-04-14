@@ -41,23 +41,44 @@ def delete_contact(db: Session, contact_id: int):
     db.commit()
     return True
 
-
 def merge_contacts(db: Session, id1: int, id2: int):
+    """
+    Merge two contacts into one.
+    """
+
+    # Prevent merging same contact
+    if id1 == id2:
+        raise HTTPException(400, "Cannot merge the same contact")
+
     c1 = db.query(Contact).filter(Contact.id == id1).first()
     c2 = db.query(Contact).filter(Contact.id == id2).first()
 
     if not c1 or not c2:
-        raise HTTPException(
-            status_code=404,
-            detail="One or both contacts not found"
-        )
+        raise HTTPException(404, "One or both contacts not found")
+
+    # Direct conflict validation
+    if c1.phone and c2.phone and c1.phone != c2.phone:
+        raise HTTPException(400, "Phone number conflict")
+
+    if c1.email and c2.email and c1.email != c2.email:
+        raise HTTPException(400, "Email conflict")
 
     try:
-        c1.name = c1.name or c2.name
-        c1.phone = c1.phone or c2.phone
-        c1.email = c1.email or c2.email
-
+        # STEP 1: delete secondary contact first
         db.delete(c2)
+        db.flush()  # ensures deletion is applied before update
+
+        # STEP 2: now safely merge
+        if not c1.name:
+            c1.name = c2.name
+
+        if not c1.phone:
+            c1.phone = c2.phone
+
+        if not c1.email:
+            c1.email = c2.email
+
+        # STEP 3: commit
         db.commit()
         db.refresh(c1)
 
@@ -65,7 +86,8 @@ def merge_contacts(db: Session, id1: int, id2: int):
 
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=400,
-            detail="Conflict while merging"
-        )
+        raise HTTPException(400, "Database integrity error during merge")
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, str(e))

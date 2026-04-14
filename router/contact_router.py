@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
@@ -38,10 +38,37 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db)):
         return error_response(str(e))
 
 
-@router.put("/merge")
+# @router.put("/merge")
+# def merge_contacts(id1: int, id2: int, db: Session = Depends(get_db)):
+#     try:
+#         data = contact_service.merge_contacts(db, id1, id2)
+#         return success_response(data, "Contacts merged successfully")
+#     except Exception as e:
+#         return error_response(str(e))
+    
+
+@router.put("/merge", status_code=200)
 def merge_contacts(id1: int, id2: int, db: Session = Depends(get_db)):
+    """
+    API endpoint to merge two contacts.
+
+    Query Parameters:
+    - id1: primary contact ID
+    - id2: secondary contact ID to merge and delete
+    """
     try:
-        data = contact_service.merge_contacts(db, id1, id2)
-        return success_response(data, "Contacts merged successfully")
+        merged_contact = contact_service.merge_contacts(db, id1, id2)
+        return success_response(
+            data=merged_contact,
+            message="Contacts merged successfully"
+        )
+    except HTTPException as http_err:
+        return error_response(
+            message=http_err.detail,
+            status_code=http_err.status_code
+        )
     except Exception as e:
-        return error_response(str(e))
+        return error_response(
+            message=str(e),
+            status_code=500
+        )
