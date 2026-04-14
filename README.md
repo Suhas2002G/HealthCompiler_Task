@@ -18,7 +18,6 @@ A backend application to manage personal contacts, built using FastAPI, SQLite, 
 ## Project Structure
 
 ```
-contact_book/
 │── core/            # Database configuration
 │── models/          # ORM models and Pydantic schemas
 │── router/          # API routes
@@ -46,7 +45,6 @@ contact_book/
 
    ```bash
    git clone <your-repo-url>
-   cd contact_book
    ```
 
 2. Create a virtual environment:
@@ -174,10 +172,8 @@ If deployed as a scalable web application, the following changes would be made:
 
 * Replace SQLite with PostgreSQL for better concurrency
 * Add authentication (JWT-based user system)
-* Introduce API gateway and load balancing
 * Use Redis for caching frequently accessed data
 * Implement logging and monitoring (Prometheus, Grafana)
-* Containerize using Docker and deploy on cloud (AWS/GCP)
 * Add rate limiting and security best practices (HTTPS, input sanitization)
 
 ---
