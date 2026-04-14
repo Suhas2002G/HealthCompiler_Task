@@ -6,11 +6,6 @@ class ContactCreate(BaseModel):
     phone: Optional[str] = Field(None, min_length=10, max_length=10)
     email: Optional[EmailStr] = None
 
-    @model_validator(mode="after")
-    def validate_at_least_one(cls, values):
-        if not (values.name or values.phone or values.email):
-            raise ValueError("At least one field must be provided")
-        return values
 
 class ContactResponse(BaseModel):
     id: int
